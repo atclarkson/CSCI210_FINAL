@@ -4,11 +4,12 @@
 *	Purpose: Create a Database for a business idea that we've been working on all semester
 */
 
-// TODO this is just a starting point from a previous project.  TODO - Everything.
 
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <vector>
+#include <sstream>
 #include "sqlite3.h"
 
 using namespace std;
@@ -55,7 +56,7 @@ int main()
 // Menu Functions
 void mainMenu(sqlite3 *db) {
 	int choice;
-	cout << "Pro Tournament Manager: " << endl;
+	cout << "\nPro Tournament Manager: " << endl;
 	cout << "1. Registration" << endl;
 	cout << "2. Weigh-In" << endl;
 	cout << "3. Results" << endl;
@@ -69,7 +70,7 @@ void mainMenu(sqlite3 *db) {
 		cout << endl;
 		cin.clear();
 		cin.ignore();
-		cout << "Pro Tournament Manager: " << endl;
+		cout << "\nPro Tournament Manager: " << endl;
 		cout << "1. Registration" << endl;
 		cout << "2. Weigh-In" << endl;
 		cout << "3. Results" << endl;
@@ -84,7 +85,7 @@ void mainMenu(sqlite3 *db) {
 	else if (choice == 2) {
 		weighinMenu(db);
 	}
-	else if (choice == 2) {
+	else if (choice == 3) {
 		resultsMenu(db);
 	}
 	else if (choice == 4) {
@@ -102,7 +103,7 @@ void mainMenu(sqlite3 *db) {
 // Registration Submenu
 void registrationMenu(sqlite3 *db){
 	int choice;
-	cout << "Pro Tournament Manager" << endl;
+	cout << "\nPro Tournament Manager" << endl;
 	cout << "Registration" << endl;
 	cout << "1. Add Angler" << endl;
 	cout << "2. Delete Angler" << endl;
@@ -116,7 +117,7 @@ void registrationMenu(sqlite3 *db){
 		cout << endl;
 		cin.clear();
 		cin.ignore();
-		cout << "Pro Tournament Manager" << endl;
+		cout << "\nPro Tournament Manager" << endl;
 		cout << "Registration" << endl;
 		cout << "1. Add Angler" << endl;
 		cout << "2. Delete Angler" << endl;
@@ -144,11 +145,13 @@ void registrationMenu(sqlite3 *db){
 }
 
 void weighinMenu(sqlite3 *db){}
-void reusltsMenu(sqlite3 *db){}
+void resultsMenu(sqlite3 *db){
+	tournamentsByLake(db);
+}
 void settingsMenu(sqlite3 *db){}
 
 void anglersByTournament(sqlite3 *db){}
-void tournamentsByLake(sqlite3 *db){}
+
 
 void registerAngler(sqlite3 *db){}
 
@@ -165,14 +168,16 @@ void removeResult(sqlite3 *db){}
 void removeLocation(sqlite3 *db){}
 
 
-void customerbyregion(sqlite3 *db)
+// Display a list of tournaments after the user selects the lake they want to look at
+void tournamentsByLake(sqlite3 *db)
 {
-	/*Need to provide the select statement to get the region names from the database.*/
-	string query = "SELECT REG_NAME FROM DWREGION;";
+	string query = "SELECT loc_name FROM location;";
 	sqlite3_stmt *pRes;
 	string m_strLastError;
 	string query2;
-	string region;
+	string location;
+	string query3;
+	string tournament;
 	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
 	{
 		m_strLastError = sqlite3_errmsg(db);
@@ -182,7 +187,7 @@ void customerbyregion(sqlite3 *db)
 	}
 	else
 	{
-		cout << "Please choose a region:" << endl;
+		cout << "\nPlease choose a location:" << endl;
 		int columnCount = sqlite3_column_count(pRes);
 		int i = 1, choice;
 		sqlite3_stmt *pRes2;
@@ -208,12 +213,51 @@ void customerbyregion(sqlite3 *db)
 		sqlite3_reset(pRes);
 		for (int j = 0; j < choice; j++)
 			sqlite3_step(pRes);
-		region = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 0));
+		location = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 0));
 		sqlite3_finalize(pRes);
-		//need to provide the query to select the customers with the chosen region from the database
-		query2 = "SELECT CUS_FNAME || ' ' || CUS_LNAME AS Name FROM DWCUSTOMER WHERE REG_ID = '" + to_string(choice) + "'";
 
-		if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
+
+		query2 = "SELECT tourn_name, tourn_id FROM tournament WHERE loc_id = '" + to_string(choice) + "'";
+		if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+		{
+			m_strLastError = sqlite3_errmsg(db);
+			sqlite3_finalize(pRes);
+			cout << "There was an error: " << m_strLastError << endl;
+			return;
+		}
+		else
+		{
+			cout << "\nPlease choose a tournament:" << endl;
+			int columnCount = sqlite3_column_count(pRes);
+			int i = 1, choice;
+			sqlite3_stmt *pRes2;
+			cout << left;
+			while (sqlite3_step(pRes) == SQLITE_ROW)
+			{
+				cout << i << ". " << sqlite3_column_text(pRes, 0);
+				cout << endl;
+				i++;
+			}
+			do
+			{
+				cin >> choice;
+				if (!cin || choice < 1 || choice > i)
+					cout << "That is not a valid choice! Try Again!" << endl;
+				if (!cin)
+				{
+					cin.clear();
+					cin.ignore();
+				}
+			} while (!cin || choice < 1 || choice > i);
+
+			sqlite3_reset(pRes);
+			for (int j = 0; j < choice; j++)
+				sqlite3_step(pRes);
+			tournament = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
+			sqlite3_finalize(pRes);
+		query3 = "SELECT angler.angler_fname || ' ' || angler.angler_lname AS 'Name', weighin.weigh_weight AS 'Total Weight' FROM weighin INNER JOIN angler ON angler.angler_id = weighin.angler_id WHERE tourn_id = '" + tournament + "' ORDER BY weighin.weigh_weight DESC;";
+
+		if (sqlite3_prepare_v2(db, query3.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
 		{
 			m_strLastError = sqlite3_errmsg(db);
 			sqlite3_finalize(pRes2);
@@ -242,7 +286,7 @@ void customerbyregion(sqlite3 *db)
 			}
 			sqlite3_finalize(pRes2);
 		}
-
+		}
 	}
 }
 
