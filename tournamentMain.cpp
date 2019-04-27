@@ -1,5 +1,5 @@
 /*  Program name: tournamentMain
-*		Quick What's Up:  This is the final project for CSCI210.
+*	Quick What's Up:  This is the final project for CSCI210.
 *   Date last updated: 04/26/2019
 *	Purpose: Create a Database for a business idea that we've been working on all semester
 */
@@ -36,6 +36,7 @@ void removeLocation(sqlite3 *db);
 void mainMenu(sqlite3 *db);
 void registrationMenu(sqlite3 *db);
 void weighinMenu(sqlite3 *db);
+void resultsMenu(sqlite3 *db);
 void settingsMenu(sqlite3 *db);
 
 int main()
@@ -57,7 +58,8 @@ void mainMenu(sqlite3 *db) {
 	cout << "Pro Tournament Manager: " << endl;
 	cout << "1. Registration" << endl;
 	cout << "2. Weigh-In" << endl;
-	cout << "3. Settings" << endl;
+	cout << "3. Results" << endl;
+	cout << "4. Settings" << endl;
 	cout << "0. Exit" << endl;
 	cout << "Enter Choice: ";
 	cin >> choice;
@@ -70,7 +72,8 @@ void mainMenu(sqlite3 *db) {
 		cout << "Pro Tournament Manager: " << endl;
 		cout << "1. Registration" << endl;
 		cout << "2. Weigh-In" << endl;
-		cout << "3. Settings" << endl;
+		cout << "3. Results" << endl;
+		cout << "4. Settings" << endl;
 		cout << "0. Exit" << endl;
 		cout << "Enter Choice: ";
 		cin >> choice;
@@ -81,7 +84,10 @@ void mainMenu(sqlite3 *db) {
 	else if (choice == 2) {
 		weighinMenu(db);
 	}
-	else if (choice == 3) {
+	else if (choice == 2) {
+		resultsMenu(db);
+	}
+	else if (choice == 4) {
 		settingsMenu(db);
 	}
 	else if (choice == 0) {
@@ -138,6 +144,7 @@ void registrationMenu(sqlite3 *db){
 }
 
 void weighinMenu(sqlite3 *db){}
+void reusltsMenu(sqlite3 *db){}
 void settingsMenu(sqlite3 *db){}
 
 void anglersByTournament(sqlite3 *db){}
