@@ -18,6 +18,8 @@ using namespace std;
 void anglersByTournament(sqlite3 *db);
 void tournamentsByLake(sqlite3 *db);
 
+void registerAngler(sqlite3 *db);
+
 // Add
 void addAngler(sqlite3 *db);
 void addTournament(sqlite3 *db);
@@ -31,10 +33,10 @@ void removeResult(sqlite3 *db);
 void removeLocation(sqlite3 *db);
 
 // Menus
-void mainMenu(void);
-void registrationMenu(void);
-void weighinMenu(void);
-void settingsMenu(void);
+void mainMenu(sqlite3 *db);
+void registrationMenu(sqlite3 *db);
+void weighinMenu(sqlite3 *db);
+void settingsMenu(sqlite3 *db);
 
 int main()
 {
@@ -44,13 +46,13 @@ int main()
 	rc = sqlite3_open_v2("tournament.db", &mydb, SQLITE_OPEN_READWRITE, "win32");
 
 	// Display and run the main menu portion of the program
-	mainMenu();
+	mainMenu(mydb);
 
 	return 0;
 } // End main() -------------------------------------------
 
 // Menu Functions
-int mainMenu(void) {
+void mainMenu(sqlite3 *db) {
 	int choice;
 	cout << "Pro Tournament Manager: " << endl;
 	cout << "1. Registration" << endl;
@@ -74,13 +76,13 @@ int mainMenu(void) {
 		cin >> choice;
 	}
 	if (choice == 1) {
-		registrationMenu();
+		registrationMenu(db);
 	}
 	else if (choice == 2) {
-		weighinMenu();
+		weighinMenu(db);
 	}
 	else if (choice == 3) {
-		settingsMenu();
+		settingsMenu(db);
 	}
 	else if (choice == 0) {
 		cout << "Thank you.  Now Exiting Program." << endl;
@@ -92,7 +94,7 @@ int mainMenu(void) {
 	}
 }
 // Registration Submenu
-void registrationMenu(void){
+void registrationMenu(sqlite3 *db){
 	int choice;
 	cout << "Pro Tournament Manager" << endl;
 	cout << "Registration" << endl;
@@ -119,24 +121,42 @@ void registrationMenu(void){
 		cin >> choice;
 	}
 	if (choice == 1) {
-		addAngler();
+		addAngler(db);
 	}
 	else if (choice == 2) {
-		removeAngler();
+		removeAngler(db);
 	}
 	else if (choice == 3) {
-		registerAngler();
+		registerAngler(db);
 	}
 	else if (choice == 0) {
-		mainMenu();
+		mainMenu(db);
 	}
 	else {
 		cout << "I don't understand the choice the program will now exit" << endl;
 	}
 }
 
-void weighinMenu(void){}
-void settingsMenu(void){}
+void weighinMenu(sqlite3 *db){}
+void settingsMenu(sqlite3 *db){}
+
+void anglersByTournament(sqlite3 *db){}
+void tournamentsByLake(sqlite3 *db){}
+
+void registerAngler(sqlite3 *db){}
+
+// Add
+void addAngler(sqlite3 *db){}
+void addTournament(sqlite3 *db){}
+void addResult(sqlite3 *db){}
+void addLocation(sqlite3 *db){}
+
+// Delete
+void removeAngler(sqlite3 *db){}
+void removeTournament(sqlite3 *db){}
+void removeResult(sqlite3 *db){}
+void removeLocation(sqlite3 *db){}
+
 
 void customerbyregion(sqlite3 *db)
 {
