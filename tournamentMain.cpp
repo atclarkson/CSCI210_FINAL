@@ -32,7 +32,9 @@ void removeLocation(sqlite3 *db);
 
 // Menus
 void mainMenu(void);
-
+void registrationMenu(void);
+void weighinMenu(void);
+void settingsMenu(void);
 
 int main()
 {
