@@ -91,6 +91,7 @@ int mainMenu(void) {
 		return;
 	}
 }
+// Registration Submenu
 void registrationMenu(void){
 	int choice;
 	cout << "Pro Tournament Manager" << endl;
@@ -131,9 +132,9 @@ void registrationMenu(void){
 	}
 	else {
 		cout << "I don't understand the choice the program will now exit" << endl;
-		return;
 	}
 }
+
 void weighinMenu(void){}
 void settingsMenu(void){}
 
