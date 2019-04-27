@@ -1,6 +1,5 @@
 /*  Program name: tournamentMain
 *		Quick What's Up:  This is the final project for CSCI210.
-*   Author: Adam Clarkson
 *   Date last updated: 04/26/2019
 *	Purpose: Create a Database for a business idea that we've been working on all semester
 */
@@ -14,50 +13,81 @@
 
 using namespace std;
 
+// function prototypes
+// serach and return
+void anglersByTournament(sqlite3 *db);
+void tournamentsByLake(sqlite3 *db);
 
-void customerbyregion(sqlite3 *db);
-void salesperquarter(sqlite3 *db);
+// Add
+void addAngler(sqlite3 *db);
+void addTournament(sqlite3 *db);
+void addResult(sqlite3 *db);
+void addLocation(sqlite3 *db);
+
+// Delete
+void removeAngler(sqlite3 *db);
+void removeTournament(sqlite3 *db);
+void removeResult(sqlite3 *db);
+void removeLocation(sqlite3 *db);
+
+// Menus
+void mainMenu(void);
+
+
 int main()
 {
-	int choice;
 	int rc;
-
 	sqlite3 *mydb;
 	// Open the Database
-	rc = sqlite3_open_v2("SaleCo.db", &mydb, SQLITE_OPEN_READWRITE, "win32");
+	rc = sqlite3_open_v2("tournament.db", &mydb, SQLITE_OPEN_READWRITE, "win32");
 
-	cout << "Reports Available: " << endl;
-	cout << "1. Customers by Region" << endl;
-	cout << "2. Sales per Quarter" << endl;
+	// Display and run the main menu portion of the program
+	mainMenu();
+
+	return 0;
+}
+// END MAIN -------------------------------------------
+
+// Menu Functions
+int mainMenu(void) {
+	int choice;
+	cout << "Pro Tournament Manager: " << endl;
+	cout << "1. Registration" << endl;
+	cout << "2. Weigh-In" << endl;
+	cout << "3. Settings" << endl;
 	cout << "Enter Choice: ";
 	cin >> choice;
-	while (!cin)
-	{
+	while (!cin) {
 		cout << endl;
 		cout << "That is not a valid choice:" << endl;
 		cout << endl;
 		cin.clear();
 		cin.ignore();
-		cout << "Reports Available: " << endl;
-		cout << "1. Customers by Region" << endl;
-		cout << "2. Sales per Quarter" << endl;
+		cout << "Pro Tournament Manager: " << endl;
+		cout << "1. Registration" << endl;
+		cout << "2. Weigh-In" << endl;
+		cout << "3. Settings" << endl;
+		cout << "0. Exit" << endl;
 		cout << "Enter Choice: ";
 		cin >> choice;
 	}
-	if (choice == 1)
-	{
-		customerbyregion(mydb);
+	if (choice == 1) {
+		registrationMenu();
 	}
-	else if (choice == 2)
-	{
-		salesperquarter(mydb);
+	else if (choice == 2) {
+		weighinMenu();
 	}
-	else
-	{
+	else if (choice == 3) {
+		settingsMenu();
+	}
+	else if (choice == 0) {
+		cout << "Thank you.  Now Exiting Program." << endl;
+		return;
+	}
+	else {
 		cout << "I don't understand the choice the program will now exit" << endl;
-		return 0;
+		return;
 	}
-	return 0;
 }
 
 
@@ -181,9 +211,4 @@ void salesperquarter(sqlite3 * db)
 		}
 		sqlite3_finalize(pRes);
 	}
-
-
-
 }
-
-//Need to create the salesperquarter function.  The quarters should be displayed by quarter - year from the DW time database.
