@@ -47,8 +47,7 @@ int main()
 	mainMenu();
 
 	return 0;
-}
-// END MAIN -------------------------------------------
+} // End main() -------------------------------------------
 
 // Menu Functions
 int mainMenu(void) {
@@ -57,6 +56,7 @@ int mainMenu(void) {
 	cout << "1. Registration" << endl;
 	cout << "2. Weigh-In" << endl;
 	cout << "3. Settings" << endl;
+	cout << "0. Exit" << endl;
 	cout << "Enter Choice: ";
 	cin >> choice;
 	while (!cin) {
@@ -91,7 +91,51 @@ int mainMenu(void) {
 		return;
 	}
 }
-
+void registrationMenu(void){
+	int choice;
+	cout << "Pro Tournament Manager" << endl;
+	cout << "Registration" << endl;
+	cout << "1. Add Angler" << endl;
+	cout << "2. Delete Angler" << endl;
+	cout << "3. Register Anglers for Tournament" << endl;
+  cout << "0. Go Back to Main" << endl;
+	cout << "Enter Choice: ";
+	cin >> choice;
+	while (!cin) {
+		cout << endl;
+		cout << "That is not a valid choice:" << endl;
+		cout << endl;
+		cin.clear();
+		cin.ignore();
+		cout << "Pro Tournament Manager" << endl;
+		cout << "Registration" << endl;
+		cout << "1. Add Angler" << endl;
+		cout << "2. Delete Angler" << endl;
+		cout << "3. Register Anglers for Tournament" << endl;
+	  cout << "0. Go Back to Main" << endl;
+		cout << "Enter Choice: ";
+		cin >> choice;
+		cin >> choice;
+	}
+	if (choice == 1) {
+		addAngler();
+	}
+	else if (choice == 2) {
+		removeAngler();
+	}
+	else if (choice == 3) {
+		registerAngler();
+	}
+	else if (choice == 0) {
+		mainMenu();
+	}
+	else {
+		cout << "I don't understand the choice the program will now exit" << endl;
+		return;
+	}
+}
+void weighinMenu(void){}
+void settingsMenu(void){}
 
 void customerbyregion(sqlite3 *db)
 {
