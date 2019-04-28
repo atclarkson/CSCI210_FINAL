@@ -1,7 +1,6 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
-#include "pch.h"
 #include <iostream>
 #include <string>
 

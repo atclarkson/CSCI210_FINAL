@@ -11,6 +11,7 @@
 #include <vector>
 #include <sstream>
 #include "sqlite3.h"
+#include "prompt.h"
 
 using namespace std;
 
@@ -156,7 +157,60 @@ void anglersByTournament(sqlite3 *db){}
 void registerAngler(sqlite3 *db){}
 
 // Add
-void addAngler(sqlite3 *db){}
+// Adds an angler to the database
+void addAngler(sqlite3 *db){
+	// Prompt for the angler information
+	cin.clear();
+	cin.ignore();
+	string fname = promptForString("First Name: ");
+	string lname = promptForString("Last Name: ");
+	string mname = promptForString("Middle Name: ");
+	string add1 = promptForString("Address: ");
+	string add2 = promptForString("Address2: ");
+	string city = promptForString("City : ");
+	string state = promptForString("State : ");
+	string zip = promptForString("Zip : ");
+	string phone1 = promptForString("Phone 1 : ");
+	string phone2 = promptForString("Phone 2 : ");
+
+	string query = "INSERT INTO angler (angler_fname, angler_lname, angler_mname, angler_address1, angler_address2, angler_city, angler_state, angler_zip, angler_phone1, angler_phone2)	VALUES ("+ ((fname != "") ? ("'" + fname + "'") : "NULL") + ","+ ((lname != "") ? ("'" + lname + "'") : "NULL") + ","+ ((mname != "") ? ("'" + mname + "'") : "NULL") + ","+ ((add1 != "") ? ("'" + add1 + "'") : "NULL") + ","+ ((add2 != "") ? ("'" + add2 + "'") : "NULL") + ","+ ((city != "") ? ("'" + city + "'") : "NULL") + ","+ ((state != "") ? ("'" + state + "'") : "NULL") + ","+ ((state != "") ? ("'" + state + "'") : "NULL") + ","+ ((phone1 != "") ? ("'" + phone1 + "'") : "NULL") + ","+ ((phone2 != "") ? ("'" + phone2 + "'") : "NULL") + ");";
+	sqlite3_stmt* pRes;
+	string m_strLastError;
+
+
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		int columnCount = sqlite3_column_count(pRes);
+		columnCount = sqlite3_column_count(pRes);
+		cout << left;
+		for (int i = 0; i < columnCount; i++)
+		{
+			cout << "|" << setw(20) << sqlite3_column_name(pRes, i);
+		}
+		cout << "|" << endl;
+		while (sqlite3_step(pRes) == SQLITE_ROW)
+		{
+			for (int i = 0; i < columnCount; i++)
+			{
+				if (sqlite3_column_type(pRes, i) != SQLITE_NULL) //need to bring up to students
+					cout << "|" << setw(20) << sqlite3_column_text(pRes, i);
+				else
+					cout << "|" << setw(20) << " ";
+			}
+			cout << "|" << endl;
+		}
+		sqlite3_finalize(pRes);
+	}
+
+
+}
 void addTournament(sqlite3 *db){}
 void addResult(sqlite3 *db){}
 void addLocation(sqlite3 *db){}
@@ -169,8 +223,7 @@ void removeLocation(sqlite3 *db){}
 
 
 // Display a list of tournaments after the user selects the lake they want to look at
-void tournamentsByLake(sqlite3 *db)
-{
+void tournamentsByLake(sqlite3 *db) {
 	string query = "SELECT loc_name FROM location;";
 	sqlite3_stmt *pRes;
 	string m_strLastError;
@@ -179,7 +232,7 @@ void tournamentsByLake(sqlite3 *db)
 	string query3;
 	string tournament;
 	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
-	{
+	{  // Handle an error from the previous sql query
 		m_strLastError = sqlite3_errmsg(db);
 		sqlite3_finalize(pRes);
 		cout << "There was an error: " << m_strLastError << endl;
