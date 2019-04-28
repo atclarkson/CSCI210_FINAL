@@ -47,9 +47,11 @@ int main()
 	sqlite3 *mydb;
 	// Open the Database
 	rc = sqlite3_open_v2("tournament.db", &mydb, SQLITE_OPEN_READWRITE, "win32");
-
+	bool isWorking = true;
 	// Display and run the main menu portion of the program
-	mainMenu(mydb);
+	while (isWorking){
+		mainMenu(mydb);
+	}
 
 	return 0;
 } // End main() -------------------------------------------
@@ -94,6 +96,7 @@ void mainMenu(sqlite3 *db) {
 	}
 	else if (choice == 0) {
 		cout << "Thank you.  Now Exiting Program." << endl;
+		isWorking = false;
 		return;
 	}
 	else {
@@ -149,7 +152,48 @@ void weighinMenu(sqlite3 *db){}
 void resultsMenu(sqlite3 *db){
 	tournamentsByLake(db);
 }
-void settingsMenu(sqlite3 *db){}
+void settingsMenu(sqlite3 *db){
+	int choice;
+	cout << "\nPro Tournament Manager" << endl;
+	cout << "Settings" << endl;
+	cout << "1. Add Location" << endl;
+	cout << "2. Add Tournament" << endl;
+	cout << "3. Modify a tournament" << endl;
+  cout << "0. Go Back to Main" << endl;
+	cout << "Enter Choice: ";
+	cin >> choice;
+	while (!cin) {
+		cout << endl;
+		cout << "That is not a valid choice:" << endl;
+		cout << endl;
+		cin.clear();
+		cin.ignore();
+		cout << "\nPro Tournament Manager" << endl;
+		cout << "Settings" << endl;
+		cout << "1. Add Location" << endl;
+		cout << "2. Add Tournament" << endl;
+		cout << "3. Modify a tournament" << endl;
+	  cout << "0. Go Back to Main" << endl;
+		cout << "Enter Choice: ";
+		cin >> choice;
+		cin >> choice;
+	}
+	if (choice == 1) {
+		addLocation(db);
+	}
+	else if (choice == 2) {
+		addTournament(db);
+	}
+	else if (choice == 3) {
+		// TODO modifyTournament(db);
+	}
+	else if (choice == 0) {
+		mainMenu(db);
+	}
+	else {
+		cout << "I don't understand the choice the program will now exit" << endl;
+	}
+}
 
 void anglersByTournament(sqlite3 *db){}
 
