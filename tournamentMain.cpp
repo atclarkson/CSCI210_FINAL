@@ -35,7 +35,7 @@ void removeResult(sqlite3 *db);
 void removeLocation(sqlite3 *db);
 
 // Menus
-void mainMenu(sqlite3 *db);
+bool mainMenu(sqlite3 *db);
 void registrationMenu(sqlite3 *db);
 void weighinMenu(sqlite3 *db);
 void resultsMenu(sqlite3 *db);
@@ -50,14 +50,14 @@ int main()
 	bool isWorking = true;
 	// Display and run the main menu portion of the program
 	while (isWorking){
-		mainMenu(mydb);
+		isWorking = mainMenu(mydb);
 	}
 
 	return 0;
 } // End main() -------------------------------------------
 
 // Menu Functions
-void mainMenu(sqlite3 *db) {
+bool mainMenu(sqlite3 *db) {
 	int choice;
 	cout << "\nPro Tournament Manager: " << endl;
 	cout << "1. Registration" << endl;
@@ -96,12 +96,11 @@ void mainMenu(sqlite3 *db) {
 	}
 	else if (choice == 0) {
 		cout << "Thank you.  Now Exiting Program." << endl;
-		isWorking = false;
-		return;
+		return false;
 	}
 	else {
 		cout << "I don't understand the choice the program will now exit" << endl;
-		return;
+		return true;
 	}
 }
 // Registration Submenu
