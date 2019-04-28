@@ -211,8 +211,99 @@ void addAngler(sqlite3 *db){
 
 
 }
+// Add a tournament to the database
 void addTournament(sqlite3 *db){
+	// Determine the location loc_id
+	string query = "SELECT loc_name, loc_id FROM location;";
+	sqlite3_stmt *pRes;
+	string m_strLastError;
+	string loc_id;
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{  // Handle an error from the previous sql query
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		cout << "\nPlease choose a location:" << endl;
+		int columnCount = sqlite3_column_count(pRes);
+		int i = 1, choice;
+		sqlite3_stmt *pRes2;
+		cout << left;
+		while (sqlite3_step(pRes) == SQLITE_ROW)
+		{
+			cout << i << ". " << sqlite3_column_text(pRes, 0);
+			cout << endl;
+			i++;
+		}
+		do
+		{
+			cin >> choice;
+			if (!cin || choice < 1 || choice > i)
+				cout << "That is not a valid choice! Try Again!" << endl;
+			if (!cin)
+			{
+				cin.clear();
+				cin.ignore();
+			}
+		} while (!cin || choice < 1 || choice > i);
+
+		sqlite3_reset(pRes);
+		for (int j = 0; j < choice; j++)
+			sqlite3_step(pRes);
+		loc_id = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
+		sqlite3_finalize(pRes);
+	}
+	// Prompt for the rest of the tournament information
+	cin.clear();
+	cin.ignore();
+	string tourn_name = promptForString("Tournament Name: ");
+	string tourn_date = promptForDate("Date: ");
+	string tourn_penlate = to_string(promptForDouble("Late Penalty: "));
+	string tourn_penshort = to_string(promptForDouble("Short Fish Penalty: "));
+	string tourn_pendead = to_string(promptForDouble("Dead Fish Penalty: "));
+
+  string query2 = "INSERT INTO tournament (loc_id, tourn_name, tourn_date, tourn_penlate, tourn_penshort, tourn_pendead)	VALUES ("+ ((loc_id != "") ? ("'" + loc_id + "'") : "NULL") + ","+ ((tourn_name != "") ? ("'" + tourn_name + "'") : "NULL") + ","+ ((tourn_date != "") ? ("'" + tourn_date + "'") : "NULL") + ","+ ((tourn_penlate != "") ? ("'" + tourn_penlate + "'") : "NULL") + ","+ ((tourn_penshort != "") ? ("'" + tourn_penshort + "'") : "NULL") + ","+ ((tourn_pendead != "") ? ("'" + tourn_pendead + "'") : "NULL") + ");";
+
+	sqlite3_stmt* pRes2;
+
+
+
+	if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
+	{
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes2);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		int columnCount = sqlite3_column_count(pRes2);
+		columnCount = sqlite3_column_count(pRes2);
+		cout << left;
+		for (int i = 0; i < columnCount; i++)
+		{
+			cout << "|" << setw(20) << sqlite3_column_name(pRes2, i);
+		}
+		cout << "|" << endl;
+		while (sqlite3_step(pRes2) == SQLITE_ROW)
+		{
+			for (int i = 0; i < columnCount; i++)
+			{
+				if (sqlite3_column_type(pRes2, i) != SQLITE_NULL) //need to bring up to students
+					cout << "|" << setw(20) << sqlite3_column_text(pRes2, i);
+				else
+					cout << "|" << setw(20) << " ";
+			}
+			cout << "|" << endl;
+		}
+		sqlite3_finalize(pRes2);
+	}
 }
+
+
 void addResult(sqlite3 *db){}
 void addLocation(sqlite3 *db){
 	// Prompt for the location information
@@ -260,6 +351,7 @@ void addLocation(sqlite3 *db){
 		sqlite3_finalize(pRes);
 	}
 }
+
 
 // Delete
 void removeAngler(sqlite3 *db){}
