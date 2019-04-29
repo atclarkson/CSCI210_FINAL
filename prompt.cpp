@@ -107,7 +107,7 @@ int promptForPositiveInt(string prompt)
 std::string promptForDate(std::string prompt) {
 	int month = promptForIntBetween(1, 12, "Month (1-12): ");
 	int day = promptForIntBetween(1, 31, "Day (1-31): ");
-	int year = promptForIntBetween(1, 2200, "Year (ex. 2014): ");
-	std::string retStr = year + "-" + ((month > 9) ? to_string(month) : "0" + to_string(month)) + "-" + ((day > 9) ? to_string(day) : "0" + to_string(day));
+	int year = promptForInt("Year (ex. 2014): ");
+	std::string retStr = to_string(year) + "-" + ((month > 9) ? to_string(month) : "0" + to_string(month)) + "-" + ((day > 9) ? to_string(day) : "0" + to_string(day));
 	return retStr;
 }

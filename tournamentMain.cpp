@@ -344,6 +344,7 @@ void addTournament(sqlite3 *db){
 		}
 		sqlite3_finalize(pRes2);
 	}
+	mainMenu(db);
 }
 
 
