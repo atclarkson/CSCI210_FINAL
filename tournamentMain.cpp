@@ -17,7 +17,6 @@ using namespace std;
 
 // function prototypes
 // search and return
-void anglersByTournament(sqlite3 *db);
 void tournamentsByLake(sqlite3 *db);
 
 void registerAngler(sqlite3 *db);
@@ -45,6 +44,7 @@ void settingsMenu(sqlite3 *db);
 string locidSubMenu(sqlite3 * db);
 string tournidSubMenu(sqlite3 * db, string loc_id);
 string angleridSubMenu(sqlite3 * db);
+string anglersByTournament(sqlite3 *db)
 
 int main()
 {
@@ -154,6 +154,7 @@ void registrationMenu(sqlite3 *db){
 }
 
 void weighinMenu(sqlite3 *db){
+	angler_id = anglersByTournament(db);
 
 
 }
@@ -318,8 +319,6 @@ void settingsMenu(sqlite3 *db){
 		cout << "I don't understand the choice the program will now exit" << endl;
 	}
 }
-
-void anglersByTournament(sqlite3 *db){}
 
 
 void registerAngler(sqlite3 *db){
@@ -729,8 +728,55 @@ string tournidSubMenu(sqlite3 * db, string loc_id) {
 	return tourn_id;
 }
 string angleridSubMenu(sqlite3 * db) {
-	// Determine the location loc_id
 	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler_id FROM angler;";
+	sqlite3_stmt *pRes;
+	string m_strLastError;
+	string angler_id;
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{  // Handle an error from the previous sql query
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+	}
+	else
+	{
+		cout << "\nPlease select an angler: " << endl;
+		int columnCount = sqlite3_column_count(pRes);
+		int i = 1, choice;
+		sqlite3_stmt *pRes2;
+		cout << left;
+		while (sqlite3_step(pRes) == SQLITE_ROW)
+		{
+			cout << i << ". " << sqlite3_column_text(pRes, 0);
+			cout << endl;
+			i++;
+		}
+		do
+		{
+			cin >> choice;
+			if (!cin || choice < 1 || choice > i)
+				cout << "That is not a valid choice! Try Again!" << endl;
+			if (!cin)
+			{
+				cin.clear();
+				cin.ignore();
+			}
+		} while (!cin || choice < 1 || choice > i);
+
+		sqlite3_reset(pRes);
+		for (int j = 0; j < choice; j++)
+			sqlite3_step(pRes);
+		angler_id = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
+		sqlite3_finalize(pRes);
+	}
+	return angler_id;
+}
+
+string anglersByTournament(sqlite3 *db){
+	string loc_id = locidSubMenu(db);
+	string tourn_id = tournidSubMenu(db, loc_id);
+
+	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler_id FROM angler INNER JOIN registration ON angler.angler_id = registration.angler_id WHERE registration.tourn_id = " + tourn_id + " ;";
 	sqlite3_stmt *pRes;
 	string m_strLastError;
 	string angler_id;
