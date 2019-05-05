@@ -16,7 +16,7 @@
 using namespace std;
 
 // function prototypes
-// serach and return
+// search and return
 void anglersByTournament(sqlite3 *db);
 void tournamentsByLake(sqlite3 *db);
 
@@ -40,6 +40,11 @@ void registrationMenu(sqlite3 *db);
 void weighinMenu(sqlite3 *db);
 void resultsMenu(sqlite3 *db);
 void settingsMenu(sqlite3 *db);
+
+// Sub Menus
+string locidSubMenu(sqlite3 * db);
+string tournidSubMenu(sqlite3 * db, string loc_id);
+string angleridSubMenu(sqlite3 * db);
 
 int main()
 {
@@ -147,9 +152,128 @@ void registrationMenu(sqlite3 *db){
 	}
 }
 
-void weighinMenu(sqlite3 *db){}
+void weighinMenu(sqlite3 *db){
+
+
+}
 void resultsMenu(sqlite3 *db){
-	tournamentsByLake(db);
+	string query = "SELECT loc_name FROM location;";
+	sqlite3_stmt *pRes;
+	string m_strLastError;
+	string query2;
+	string location;
+	string query3;
+	string tournament;
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{  // Handle an error from the previous sql query
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		cout << "\nPlease choose a location:" << endl;
+		int columnCount = sqlite3_column_count(pRes);
+		int i = 1, choice;
+		sqlite3_stmt *pRes2;
+		cout << left;
+		while (sqlite3_step(pRes) == SQLITE_ROW)
+		{
+			cout << i << ". " << sqlite3_column_text(pRes, 0);
+			cout << endl;
+			i++;
+		}
+		do
+		{
+			cin >> choice;
+			if (!cin || choice < 1 || choice > i)
+				cout << "That is not a valid choice! Try Again!" << endl;
+			if (!cin)
+			{
+				cin.clear();
+				cin.ignore();
+			}
+		} while (!cin || choice < 1 || choice > i);
+
+		sqlite3_reset(pRes);
+		for (int j = 0; j < choice; j++)
+			sqlite3_step(pRes);
+		location = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 0));
+		sqlite3_finalize(pRes);
+
+
+		query2 = "SELECT tourn_name, tourn_id FROM tournament WHERE loc_id = '" + to_string(choice) + "'";
+		if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+		{
+			m_strLastError = sqlite3_errmsg(db);
+			sqlite3_finalize(pRes);
+			cout << "There was an error: " << m_strLastError << endl;
+			return;
+		}
+		else
+		{
+			cout << "\nPlease choose a tournament:" << endl;
+			int columnCount = sqlite3_column_count(pRes);
+			int i = 1, choice;
+			sqlite3_stmt *pRes2;
+			cout << left;
+			while (sqlite3_step(pRes) == SQLITE_ROW)
+			{
+				cout << i << ". " << sqlite3_column_text(pRes, 0);
+				cout << endl;
+				i++;
+			}
+			do
+			{
+				cin >> choice;
+				if (!cin || choice < 1 || choice > i)
+					cout << "That is not a valid choice! Try Again!" << endl;
+				if (!cin)
+				{
+					cin.clear();
+					cin.ignore();
+				}
+			} while (!cin || choice < 1 || choice > i);
+
+			sqlite3_reset(pRes);
+			for (int j = 0; j < choice; j++)
+				sqlite3_step(pRes);
+			tournament = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
+			sqlite3_finalize(pRes);
+		query3 = "SELECT angler.angler_fname || ' ' || angler.angler_lname AS 'Name', weighin.weigh_weight AS 'Total Weight' FROM weighin INNER JOIN angler ON angler.angler_id = weighin.angler_id WHERE tourn_id = '" + tournament + "' ORDER BY weighin.weigh_weight DESC;";
+
+		if (sqlite3_prepare_v2(db, query3.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
+		{
+			m_strLastError = sqlite3_errmsg(db);
+			sqlite3_finalize(pRes2);
+			cout << "There was an error: " << m_strLastError << endl;
+			return;
+		}
+		else
+		{
+			columnCount = sqlite3_column_count(pRes2);
+			cout << left;
+			for (int i = 0; i < columnCount; i++)
+			{
+				cout << "|" << setw(20) << sqlite3_column_name(pRes2, i);
+			}
+			cout << "|" << endl;
+			while (sqlite3_step(pRes2) == SQLITE_ROW)
+			{
+				for (int i = 0; i < columnCount; i++)
+				{
+					if (sqlite3_column_type(pRes2, i) != SQLITE_NULL) //need to bring up to students
+						cout << "|" << setw(20) << sqlite3_column_text(pRes2, i);
+					else
+						cout << "|" << setw(20) << " ";
+				}
+				cout << "|" << endl;
+			}
+			sqlite3_finalize(pRes2);
+		}
+		}
+	}
 }
 void settingsMenu(sqlite3 *db){
 	int choice;
@@ -197,7 +321,48 @@ void settingsMenu(sqlite3 *db){
 void anglersByTournament(sqlite3 *db){}
 
 
-void registerAngler(sqlite3 *db){}
+void registerAngler(sqlite3 *db){
+	string loc_id = locidSubMenu(db);
+	string tourn_id = tournidSubMenu(db, loc_id);
+	string angler_id = angleridSubMenu(db);
+
+
+	cout << loc_id << " - " << tourn_id << " - " << angler_id << endl;
+	string query2 = "INSERT INTO registration (angler_id, tourn_id) VALUES ("+ ((angler_id != "") ? ("'" + angler_id + "'") : "NULL") + ","+ ((tourn_id != "") ? ("'" + tourn_id + "'") : "NULL")  + ");";
+
+	sqlite3_stmt* pRes2;
+	string m_strLastError;
+	if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
+	{
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes2);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		int columnCount = sqlite3_column_count(pRes2);
+		columnCount = sqlite3_column_count(pRes2);
+		cout << left;
+		for (int i = 0; i < columnCount; i++)
+		{
+			cout << "|" << setw(20) << sqlite3_column_name(pRes2, i);
+		}
+		cout << "|" << endl;
+		while (sqlite3_step(pRes2) == SQLITE_ROW)
+		{
+			for (int i = 0; i < columnCount; i++)
+			{
+				if (sqlite3_column_type(pRes2, i) != SQLITE_NULL) //need to bring up to students
+					cout << "|" << setw(20) << sqlite3_column_text(pRes2, i);
+				else
+					cout << "|" << setw(20) << " ";
+			}
+			cout << "|" << endl;
+		}
+		sqlite3_finalize(pRes2);
+	}
+}
 
 // Add
 // Adds an angler to the database
@@ -403,128 +568,6 @@ void removeTournament(sqlite3 *db){}
 void removeResult(sqlite3 *db){}
 void removeLocation(sqlite3 *db){}
 
-
-// Display a list of tournaments after the user selects the lake they want to look at
-void tournamentsByLake(sqlite3 *db) {
-	string query = "SELECT loc_name FROM location;";
-	sqlite3_stmt *pRes;
-	string m_strLastError;
-	string query2;
-	string location;
-	string query3;
-	string tournament;
-	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
-	{  // Handle an error from the previous sql query
-		m_strLastError = sqlite3_errmsg(db);
-		sqlite3_finalize(pRes);
-		cout << "There was an error: " << m_strLastError << endl;
-		return;
-	}
-	else
-	{
-		cout << "\nPlease choose a location:" << endl;
-		int columnCount = sqlite3_column_count(pRes);
-		int i = 1, choice;
-		sqlite3_stmt *pRes2;
-		cout << left;
-		while (sqlite3_step(pRes) == SQLITE_ROW)
-		{
-			cout << i << ". " << sqlite3_column_text(pRes, 0);
-			cout << endl;
-			i++;
-		}
-		do
-		{
-			cin >> choice;
-			if (!cin || choice < 1 || choice > i)
-				cout << "That is not a valid choice! Try Again!" << endl;
-			if (!cin)
-			{
-				cin.clear();
-				cin.ignore();
-			}
-		} while (!cin || choice < 1 || choice > i);
-
-		sqlite3_reset(pRes);
-		for (int j = 0; j < choice; j++)
-			sqlite3_step(pRes);
-		location = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 0));
-		sqlite3_finalize(pRes);
-
-
-		query2 = "SELECT tourn_name, tourn_id FROM tournament WHERE loc_id = '" + to_string(choice) + "'";
-		if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes, NULL) != SQLITE_OK)
-		{
-			m_strLastError = sqlite3_errmsg(db);
-			sqlite3_finalize(pRes);
-			cout << "There was an error: " << m_strLastError << endl;
-			return;
-		}
-		else
-		{
-			cout << "\nPlease choose a tournament:" << endl;
-			int columnCount = sqlite3_column_count(pRes);
-			int i = 1, choice;
-			sqlite3_stmt *pRes2;
-			cout << left;
-			while (sqlite3_step(pRes) == SQLITE_ROW)
-			{
-				cout << i << ". " << sqlite3_column_text(pRes, 0);
-				cout << endl;
-				i++;
-			}
-			do
-			{
-				cin >> choice;
-				if (!cin || choice < 1 || choice > i)
-					cout << "That is not a valid choice! Try Again!" << endl;
-				if (!cin)
-				{
-					cin.clear();
-					cin.ignore();
-				}
-			} while (!cin || choice < 1 || choice > i);
-
-			sqlite3_reset(pRes);
-			for (int j = 0; j < choice; j++)
-				sqlite3_step(pRes);
-			tournament = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
-			sqlite3_finalize(pRes);
-		query3 = "SELECT angler.angler_fname || ' ' || angler.angler_lname AS 'Name', weighin.weigh_weight AS 'Total Weight' FROM weighin INNER JOIN angler ON angler.angler_id = weighin.angler_id WHERE tourn_id = '" + tournament + "' ORDER BY weighin.weigh_weight DESC;";
-
-		if (sqlite3_prepare_v2(db, query3.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
-		{
-			m_strLastError = sqlite3_errmsg(db);
-			sqlite3_finalize(pRes2);
-			cout << "There was an error: " << m_strLastError << endl;
-			return;
-		}
-		else
-		{
-			columnCount = sqlite3_column_count(pRes2);
-			cout << left;
-			for (int i = 0; i < columnCount; i++)
-			{
-				cout << "|" << setw(20) << sqlite3_column_name(pRes2, i);
-			}
-			cout << "|" << endl;
-			while (sqlite3_step(pRes2) == SQLITE_ROW)
-			{
-				for (int i = 0; i < columnCount; i++)
-				{
-					if (sqlite3_column_type(pRes2, i) != SQLITE_NULL) //need to bring up to students
-						cout << "|" << setw(20) << sqlite3_column_text(pRes2, i);
-					else
-						cout << "|" << setw(20) << " ";
-				}
-				cout << "|" << endl;
-			}
-			sqlite3_finalize(pRes2);
-		}
-		}
-	}
-}
-
 void salesperquarter(sqlite3 * db)
 {
 	/*Need to provide the select statement to get quarter and year from DB.*/
@@ -564,4 +607,141 @@ void salesperquarter(sqlite3 * db)
 		}
 		sqlite3_finalize(pRes);
 	}
+}
+
+
+string locidSubMenu(sqlite3 * db) {
+	// Determine the location loc_id
+	string query = "SELECT loc_name, loc_id FROM location;";
+	sqlite3_stmt *pRes;
+	string m_strLastError;
+	string loc_id;
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{  // Handle an error from the previous sql query
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+	}
+	else
+	{
+		cout << "\nPlease choose a location:" << endl;
+		int columnCount = sqlite3_column_count(pRes);
+		int i = 1, choice;
+		sqlite3_stmt *pRes2;
+		cout << left;
+		while (sqlite3_step(pRes) == SQLITE_ROW)
+		{
+			cout << i << ". " << sqlite3_column_text(pRes, 0);
+			cout << endl;
+			i++;
+		}
+		do
+		{
+			cin >> choice;
+			if (!cin || choice < 1 || choice > i)
+				cout << "That is not a valid choice! Try Again!" << endl;
+			if (!cin)
+			{
+				cin.clear();
+				cin.ignore();
+			}
+		} while (!cin || choice < 1 || choice > i);
+
+		sqlite3_reset(pRes);
+		for (int j = 0; j < choice; j++)
+			sqlite3_step(pRes);
+		loc_id = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
+		sqlite3_finalize(pRes);
+	}
+	return loc_id;
+}
+string tournidSubMenu(sqlite3 * db, string loc_id) {
+	// Determine the location loc_id
+	string query = "SELECT tourn_name, tourn_date FROM tournament WHERE loc_id = " + loc_id + ";";
+	sqlite3_stmt *pRes;
+	string m_strLastError;
+	string tourn_id;
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{  // Handle an error from the previous sql query
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+	}
+	else
+	{
+		cout << "\nPlease choose a Tournament:" << endl;
+		int columnCount = sqlite3_column_count(pRes);
+		int i = 1, choice;
+		sqlite3_stmt *pRes2;
+		cout << left;
+		while (sqlite3_step(pRes) == SQLITE_ROW)
+		{
+			cout << i << ". " << sqlite3_column_text(pRes, 0);
+			cout << endl;
+			i++;
+		}
+		do
+		{
+			cin >> choice;
+			if (!cin || choice < 1 || choice > i)
+				cout << "That is not a valid choice! Try Again!" << endl;
+			if (!cin)
+			{
+				cin.clear();
+				cin.ignore();
+			}
+		} while (!cin || choice < 1 || choice > i);
+
+		sqlite3_reset(pRes);
+		for (int j = 0; j < choice; j++)
+			sqlite3_step(pRes);
+		tourn_id = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
+		sqlite3_finalize(pRes);
+	}
+	return tourn_id;
+}
+string angleridSubMenu(sqlite3 * db) {
+	// Determine the location loc_id
+	string query = "SELECT angler_fname || ' ' || angler_lname AS Name FROM angler;";
+	sqlite3_stmt *pRes;
+	string m_strLastError;
+	string angler_id;
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{  // Handle an error from the previous sql query
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+	}
+	else
+	{
+		cout << "\nPlease select an angler: " << endl;
+		int columnCount = sqlite3_column_count(pRes);
+		int i = 1, choice;
+		sqlite3_stmt *pRes2;
+		cout << left;
+		while (sqlite3_step(pRes) == SQLITE_ROW)
+		{
+			cout << i << ". " << sqlite3_column_text(pRes, 0);
+			cout << endl;
+			i++;
+		}
+		do
+		{
+			cin >> choice;
+			if (!cin || choice < 1 || choice > i)
+				cout << "That is not a valid choice! Try Again!" << endl;
+			if (!cin)
+			{
+				cin.clear();
+				cin.ignore();
+			}
+		} while (!cin || choice < 1 || choice > i);
+
+		sqlite3_reset(pRes);
+		for (int j = 0; j < choice; j++)
+			sqlite3_step(pRes);
+		angler_id = reinterpret_cast<const char*>(sqlite3_column_text(pRes, 1));
+		sqlite3_finalize(pRes);
+	}
+	return angler_id;
 }
