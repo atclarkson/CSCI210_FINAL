@@ -612,7 +612,30 @@ void removeTournament(sqlite3 *db){
 	}
 }
 void removeResult(sqlite3 *db){}
-void removeLocation(sqlite3 *db){}
+void removeLocation(sqlite3 *db){
+	string loc_id = locidSubMenu(db);
+
+	string query2 = "DELETE FROM location WHERE loc_id = " + loc_id + ";";
+
+	sqlite3_stmt* pRes2;
+	string m_strLastError;
+	if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
+	{
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes2);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		int columnCount = sqlite3_column_count(pRes2);
+		columnCount = sqlite3_column_count(pRes2);
+		cout << left;
+		cout << "| Record Deleted" << endl;
+
+		sqlite3_finalize(pRes2);
+	}
+}
 
 void salesperquarter(sqlite3 * db)
 {
