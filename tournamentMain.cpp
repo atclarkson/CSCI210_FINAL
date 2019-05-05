@@ -107,7 +107,7 @@ bool mainMenu(sqlite3 *db) {
 		cout << "I don't understand the choice the program will now exit" << endl;
 		return true;
 	}
-	return true;
+	return false;
 }
 // Registration Submenu
 void registrationMenu(sqlite3 *db){
@@ -634,47 +634,6 @@ void removeLocation(sqlite3 *db){
 		cout << "| Record Deleted" << endl;
 
 		sqlite3_finalize(pRes2);
-	}
-}
-
-void salesperquarter(sqlite3 * db)
-{
-	/*Need to provide the select statement to get quarter and year from DB.*/
-	string query = "SELECT t.TM_QTR || ' - ' || TM_YEAR AS \"Quarter\", sum(d.SALE_PRICE) AS 'Quarter Total' FROM DWDAYSALESFACT d INNER JOIN DWTIME t ON d.TM_ID = t.TM_ID GROUP BY d.TM_ID;";
-	sqlite3_stmt* pRes;
-	string m_strLastError;
-
-
-
-	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
-	{
-		m_strLastError = sqlite3_errmsg(db);
-		sqlite3_finalize(pRes);
-		cout << "There was an error: " << m_strLastError << endl;
-		return;
-	}
-	else
-	{
-		int columnCount = sqlite3_column_count(pRes);
-		columnCount = sqlite3_column_count(pRes);
-		cout << left;
-		for (int i = 0; i < columnCount; i++)
-		{
-			cout << "|" << setw(20) << sqlite3_column_name(pRes, i);
-		}
-		cout << "|" << endl;
-		while (sqlite3_step(pRes) == SQLITE_ROW)
-		{
-			for (int i = 0; i < columnCount; i++)
-			{
-				if (sqlite3_column_type(pRes, i) != SQLITE_NULL) //need to bring up to students
-					cout << "|" << setw(20) << sqlite3_column_text(pRes, i);
-				else
-					cout << "|" << setw(20) << " ";
-			}
-			cout << "|" << endl;
-		}
-		sqlite3_finalize(pRes);
 	}
 }
 
