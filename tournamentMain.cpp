@@ -565,7 +565,7 @@ void addLocation(sqlite3 *db){
 void removeAngler(sqlite3 *db){
 	string angler_id = angleridSubMenu(db);
 
-	string query2 = "DELETE FROM angler WHERE angler_id = " + angler_id + ");";
+	string query2 = "DELETE FROM angler WHERE angler_id = " + angler_id + ";";
 
 	sqlite3_stmt* pRes2;
 	string m_strLastError;
@@ -581,27 +581,36 @@ void removeAngler(sqlite3 *db){
 		int columnCount = sqlite3_column_count(pRes2);
 		columnCount = sqlite3_column_count(pRes2);
 		cout << left;
-		for (int i = 0; i < columnCount; i++)
-		{
-			cout << "|" << setw(20) << sqlite3_column_name(pRes2, i);
-		}
-		cout << "|" << endl;
-		while (sqlite3_step(pRes2) == SQLITE_ROW)
-		{
-			for (int i = 0; i < columnCount; i++)
-			{
-				if (sqlite3_column_type(pRes2, i) != SQLITE_NULL)
-					cout << "|" << setw(20) << sqlite3_column_text(pRes2, i);
-				else
-					cout << "|" << setw(20) << " ";
-			}
-			cout << "| Record Deleted" << endl;
-		}
+		cout << "| Record Deleted" << endl;
+
 		sqlite3_finalize(pRes2);
 	}
-
 }
-void removeTournament(sqlite3 *db){}
+void removeTournament(sqlite3 *db){
+	string loc_id = locidSubMenu(db);
+	string tourn_id = tournidSubMenu(db, loc_id);
+
+	string query2 = "DELETE FROM tournament WHERE tourn_id = " + tourn_id + ";";
+
+	sqlite3_stmt* pRes2;
+	string m_strLastError;
+	if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
+	{
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes2);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		int columnCount = sqlite3_column_count(pRes2);
+		columnCount = sqlite3_column_count(pRes2);
+		cout << left;
+		cout << "| Record Deleted" << endl;
+
+		sqlite3_finalize(pRes2);
+	}
+}
 void removeResult(sqlite3 *db){}
 void removeLocation(sqlite3 *db){}
 
