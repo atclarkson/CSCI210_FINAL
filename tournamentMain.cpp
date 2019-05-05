@@ -107,6 +107,7 @@ bool mainMenu(sqlite3 *db) {
 		cout << "I don't understand the choice the program will now exit" << endl;
 		return true;
 	}
+	return true;
 }
 // Registration Submenu
 void registrationMenu(sqlite3 *db){
@@ -281,7 +282,7 @@ void settingsMenu(sqlite3 *db){
 	cout << "Settings" << endl;
 	cout << "1. Add Location" << endl;
 	cout << "2. Add Tournament" << endl;
-	cout << "3. Modify a tournament" << endl;
+	//cout << "3. Modify a tournament" << endl;
   cout << "0. Go Back to Main" << endl;
 	cout << "Enter Choice: ";
 	cin >> choice;
@@ -295,7 +296,7 @@ void settingsMenu(sqlite3 *db){
 		cout << "Settings" << endl;
 		cout << "1. Add Location" << endl;
 		cout << "2. Add Tournament" << endl;
-		cout << "3. Modify a tournament" << endl;
+		//cout << "3. Modify a tournament" << endl;
 	  cout << "0. Go Back to Main" << endl;
 		cout << "Enter Choice: ";
 		cin >> choice;
@@ -326,8 +327,6 @@ void registerAngler(sqlite3 *db){
 	string tourn_id = tournidSubMenu(db, loc_id);
 	string angler_id = angleridSubMenu(db);
 
-
-	cout << loc_id << " - " << tourn_id << " - " << angler_id << endl;
 	string query2 = "INSERT INTO registration (angler_id, tourn_id) VALUES ("+ ((angler_id != "") ? ("'" + angler_id + "'") : "NULL") + ","+ ((tourn_id != "") ? ("'" + tourn_id + "'") : "NULL")  + ");";
 
 	sqlite3_stmt* pRes2;
@@ -353,7 +352,7 @@ void registerAngler(sqlite3 *db){
 		{
 			for (int i = 0; i < columnCount; i++)
 			{
-				if (sqlite3_column_type(pRes2, i) != SQLITE_NULL) //need to bring up to students
+				if (sqlite3_column_type(pRes2, i) != SQLITE_NULL)
 					cout << "|" << setw(20) << sqlite3_column_text(pRes2, i);
 				else
 					cout << "|" << setw(20) << " ";
@@ -407,12 +406,12 @@ void addAngler(sqlite3 *db){
 		{
 			for (int i = 0; i < columnCount; i++)
 			{
-				if (sqlite3_column_type(pRes, i) != SQLITE_NULL) //need to bring up to students
+				if (sqlite3_column_type(pRes, i) != SQLITE_NULL)
 					cout << "|" << setw(20) << sqlite3_column_text(pRes, i);
 				else
 					cout << "|" << setw(20) << " ";
 			}
-			cout << "|" << endl;
+			cout << "| Record Added" << endl;
 		}
 		sqlite3_finalize(pRes);
 	}
@@ -563,7 +562,45 @@ void addLocation(sqlite3 *db){
 
 
 // Delete
-void removeAngler(sqlite3 *db){}
+void removeAngler(sqlite3 *db){
+	string angler_id = angleridSubMenu(db);
+
+	string query2 = "DELETE FROM angler WHERE angler_id = " + angler_id + ");";
+
+	sqlite3_stmt* pRes2;
+	string m_strLastError;
+	if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
+	{
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes2);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		int columnCount = sqlite3_column_count(pRes2);
+		columnCount = sqlite3_column_count(pRes2);
+		cout << left;
+		for (int i = 0; i < columnCount; i++)
+		{
+			cout << "|" << setw(20) << sqlite3_column_name(pRes2, i);
+		}
+		cout << "|" << endl;
+		while (sqlite3_step(pRes2) == SQLITE_ROW)
+		{
+			for (int i = 0; i < columnCount; i++)
+			{
+				if (sqlite3_column_type(pRes2, i) != SQLITE_NULL)
+					cout << "|" << setw(20) << sqlite3_column_text(pRes2, i);
+				else
+					cout << "|" << setw(20) << " ";
+			}
+			cout << "| Record Deleted" << endl;
+		}
+		sqlite3_finalize(pRes2);
+	}
+
+}
 void removeTournament(sqlite3 *db){}
 void removeResult(sqlite3 *db){}
 void removeLocation(sqlite3 *db){}
@@ -657,7 +694,7 @@ string locidSubMenu(sqlite3 * db) {
 }
 string tournidSubMenu(sqlite3 * db, string loc_id) {
 	// Determine the location loc_id
-	string query = "SELECT tourn_name, tourn_date FROM tournament WHERE loc_id = " + loc_id + ";";
+	string query = "SELECT tourn_name, tourn_id, tourn_date FROM tournament WHERE loc_id = " + loc_id + ";";
 	sqlite3_stmt *pRes;
 	string m_strLastError;
 	string tourn_id;
@@ -702,7 +739,7 @@ string tournidSubMenu(sqlite3 * db, string loc_id) {
 }
 string angleridSubMenu(sqlite3 * db) {
 	// Determine the location loc_id
-	string query = "SELECT angler_fname || ' ' || angler_lname AS Name FROM angler;";
+	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler_id FROM angler;";
 	sqlite3_stmt *pRes;
 	string m_strLastError;
 	string angler_id;
