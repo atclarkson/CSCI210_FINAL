@@ -796,7 +796,7 @@ string angleridSubMenu(sqlite3 * db) {
 	return angler_id;
 }
 string anglersByTournament(sqlite3 *db, string tourn_id){
-	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler_id FROM angler INNER JOIN registration ON angler.angler_id = registration.angler_id WHERE registration.tourn_id = " + tourn_id + " ;";
+	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler.angler_id FROM angler INNER JOIN registration ON angler.angler_id = registration.angler_id WHERE registration.tourn_id = " + tourn_id + " ;";
 	sqlite3_stmt *pRes;
 	string m_strLastError;
 	string angler_id;
