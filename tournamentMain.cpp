@@ -91,15 +91,19 @@ bool mainMenu(sqlite3 *db) {
 	}
 	if (choice == 1) {
 		registrationMenu(db);
+		return true;
 	}
 	else if (choice == 2) {
 		weighinMenu(db);
+		return true;
 	}
 	else if (choice == 3) {
 		resultsMenu(db);
+		return true;
 	}
 	else if (choice == 4) {
 		settingsMenu(db);
+		return true;
 	}
 	else if (choice == 0) {
 		cout << "Thank you.  Now Exiting Program." << endl;
@@ -166,13 +170,11 @@ void weighinMenu(sqlite3 *db){
 	string weigh_shortfish = promptForString("Short Fish: ");
 	string weigh_deadfish = promptForString("Dead Fish: ");
 	string weigh_minlate = promptForString("Minutes Late: ");
-	auto timenow =
-		 chrono::system_clock::to_time_t(chrono::system_clock::now());
-
-	 cout << ctime(&timenow) << endl;
+	auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
 	string weigh_timestamp = ctime(&timenow);
 	// Generate string for query  Use Ternary operators to put in NULL if empty string.
 	string query = "INSERT INTO weighin (angler_id, tourn_id, weigh_timestamp, weigh_weight, weigh_numfish, weigh_shortfish, weigh_deadfish, weigh_minlate)	VALUES ("+ ((angler_id != "") ? ("'" + angler_id + "'") : "NULL") + ","+ ((tourn_id != "") ? ("'" + tourn_id + "'") : "NULL") + ","+ ((weigh_timestamp != "") ? ("'" + weigh_timestamp + "'") : "NULL") + ","+ ((weigh_weight != "") ? ("'" + weigh_weight + "'") : "NULL") + ","+ ((weigh_numfish != "") ? ("'" + weigh_numfish + "'") : "NULL") + ","+ ((weigh_shortfish != "") ? ("'" + weigh_shortfish + "'") : "NULL") + ","+ ((weigh_deadfish != "") ? ("'" + weigh_deadfish + "'") : "NULL") + ","+ ((weigh_minlate != "") ? ("'" + weigh_minlate + "'") : "NULL") + ");";
+	cout << query << endl;
 	sqlite3_stmt* pRes;
 	string m_strLastError;
 
