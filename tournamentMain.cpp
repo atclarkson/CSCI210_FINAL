@@ -49,10 +49,9 @@ string anglersByTournament(sqlite3 *db, string tourn_id);
 
 /**
  * Main Functions
- * @return 
+ * @return
  */
-int main()
-{
+int main() {
 	int rc;
 	sqlite3 *mydb;
 	// Open the Database
@@ -624,7 +623,7 @@ void removeAngler(sqlite3 *db){
 	string angler_id = angleridSubMenu(db);
 
 	string query2 = "DELETE FROM angler WHERE angler_id = " + angler_id + ";";
-
+	cout << "query2: " << query2 << endl;
 	sqlite3_stmt* pRes2;
 	string m_strLastError;
 	if (sqlite3_prepare_v2(db, query2.c_str(), -1, &pRes2, NULL) != SQLITE_OK)
@@ -640,8 +639,9 @@ void removeAngler(sqlite3 *db){
 		columnCount = sqlite3_column_count(pRes2);
 		cout << left;
 		cout << "| Record Deleted" << endl;
-
+		cout << "Pre finaalize" << endl;
 		sqlite3_finalize(pRes2);
+		cout << "post finaalize" << endl;
 	}
 }
 /**
