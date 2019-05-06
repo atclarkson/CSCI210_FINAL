@@ -20,7 +20,6 @@ using namespace std;
 // function prototypes
 // search and return
 void tournamentsByLake(sqlite3 *db);
-
 void registerAngler(sqlite3 *db);
 
 // Add
@@ -48,6 +47,10 @@ string tournidSubMenu(sqlite3 * db, string loc_id);
 string angleridSubMenu(sqlite3 * db);
 string anglersByTournament(sqlite3 *db, string tourn_id);
 
+/**
+ * Main Functions
+ * @return 
+ */
 int main()
 {
 	int rc;
@@ -64,6 +67,11 @@ int main()
 } // End main() -------------------------------------------
 
 // Menu Functions
+/**
+ * Render Main Menu to screen and allow user to select what they want to do
+ * @param  db the database
+ * @return    true or false on whether or not to continue the program
+ */
 bool mainMenu(sqlite3 *db) {
 	int choice;
 	cout << "\nPro Tournament Manager: " << endl;
@@ -115,7 +123,10 @@ bool mainMenu(sqlite3 *db) {
 	}
 	return false;
 }
-// Registration Submenu
+/**
+ * registration sub Menu
+ * @param db the database
+ */
 void registrationMenu(sqlite3 *db){
 	int choice;
 	cout << "\nPro Tournament Manager" << endl;
@@ -158,7 +169,10 @@ void registrationMenu(sqlite3 *db){
 		cout << "I don't understand the choice the program will now exit" << endl;
 	}
 }
-
+/**
+ * Weigh in procedure User selects the angler and adds their results
+ * @param db
+ */
 void weighinMenu(sqlite3 *db){
 	string loc_id = locidSubMenu(db);
 	string tourn_id = tournidSubMenu(db, loc_id);
@@ -178,7 +192,6 @@ void weighinMenu(sqlite3 *db){
 	sqlite3_stmt* pRes;
 	string m_strLastError;
 
-
 	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
 	{
 		m_strLastError = sqlite3_errmsg(db);
@@ -195,9 +208,11 @@ void weighinMenu(sqlite3 *db){
 
 		sqlite3_finalize(pRes);
 	}
-
-
 }
+/**
+ * allow user to select a tournament and display the results
+ * @param db db
+ */
 void resultsMenu(sqlite3 *db){
 	string query = "SELECT loc_name FROM location;";
 	sqlite3_stmt *pRes;
@@ -317,6 +332,10 @@ void resultsMenu(sqlite3 *db){
 		}
 	}
 }
+/**
+ * Display setting menu
+ * @param db db
+ */
 void settingsMenu(sqlite3 *db){
 	int choice;
 	cout << "\nPro Tournament Manager" << endl;
@@ -360,7 +379,10 @@ void settingsMenu(sqlite3 *db){
 	}
 }
 
-
+/**
+ * User selects tournament and an angler to register to.
+ * @param db [db]
+ */
 void registerAngler(sqlite3 *db){
 	string loc_id = locidSubMenu(db);
 	string tourn_id = tournidSubMenu(db, loc_id);
@@ -403,7 +425,10 @@ void registerAngler(sqlite3 *db){
 }
 
 // Add
-// Adds an angler to the database
+/**
+ * User can add an angler to the Database
+ * @param db db
+ */
 void addAngler(sqlite3 *db){
 	// Prompt for the angler information
 	cin.clear();
@@ -443,7 +468,10 @@ void addAngler(sqlite3 *db){
 
 
 }
-// Add a tournament to the database
+/**
+ * User can add a tournament to the Database
+ * @param db
+ */
 void addTournament(sqlite3 *db){
 	// Determine the location loc_id
 	string query = "SELECT loc_name, loc_id FROM location;";
@@ -535,9 +563,10 @@ void addTournament(sqlite3 *db){
 	}
 	mainMenu(db);
 }
-
-
-void addResult(sqlite3 *db){}
+/**
+ * User can add a location to the Database
+ * @param db
+ */
 void addLocation(sqlite3 *db){
 	// Prompt for the location information
 	cin.clear();
@@ -587,6 +616,10 @@ void addLocation(sqlite3 *db){
 
 
 // Delete
+/**
+ * Allows user to select and angler to remove
+ * @param db
+ */
 void removeAngler(sqlite3 *db){
 	string angler_id = angleridSubMenu(db);
 
@@ -611,6 +644,10 @@ void removeAngler(sqlite3 *db){
 		sqlite3_finalize(pRes2);
 	}
 }
+/**
+ * allows user to select a tournament to remove
+ * @param db
+ */
 void removeTournament(sqlite3 *db){
 	string loc_id = locidSubMenu(db);
 	string tourn_id = tournidSubMenu(db, loc_id);
@@ -636,7 +673,10 @@ void removeTournament(sqlite3 *db){
 		sqlite3_finalize(pRes2);
 	}
 }
-void removeResult(sqlite3 *db){}
+/**
+ * Allows user to select a location to remove
+ * @param db
+ */
 void removeLocation(sqlite3 *db){
 	string loc_id = locidSubMenu(db);
 
@@ -662,7 +702,13 @@ void removeLocation(sqlite3 *db){
 	}
 }
 
-
+// Submenus
+/**
+ * Used inside other query functions.
+ * allows user to select location
+ * @param  db
+ * @return    loc_id
+ */
 string locidSubMenu(sqlite3 * db) {
 	// Determine the location loc_id
 	string query = "SELECT loc_name, loc_id FROM location;";
@@ -708,6 +754,13 @@ string locidSubMenu(sqlite3 * db) {
 	}
 	return loc_id;
 }
+/**
+ * Used inside other query functions.
+ * allows user to select a tournamentMain
+ * @param  db
+ * @param  loc_id location Id
+ * @return        tourn_id
+ */
 string tournidSubMenu(sqlite3 * db, string loc_id) {
 	// Determine the location loc_id
 	string query = "SELECT tourn_name, tourn_id, tourn_date FROM tournament WHERE loc_id = " + loc_id + ";";
@@ -753,6 +806,11 @@ string tournidSubMenu(sqlite3 * db, string loc_id) {
 	}
 	return tourn_id;
 }
+/**
+ * allows user to select an angler from a master list of all angler_state
+ * @param  db
+ * @return    angler_id
+ */
 string angleridSubMenu(sqlite3 * db) {
 	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler_id FROM angler;";
 	sqlite3_stmt *pRes;
@@ -797,6 +855,12 @@ string angleridSubMenu(sqlite3 * db) {
 	}
 	return angler_id;
 }
+/**
+ * Allows user to select an angler based on being registerd for a tournamentMain
+ * @param  db
+ * @param  tourn_id
+ * @return          angler_id
+ */
 string anglersByTournament(sqlite3 *db, string tourn_id){
 	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler.angler_id FROM angler INNER JOIN registration ON angler.angler_id = registration.angler_id WHERE registration.tourn_id = " + tourn_id + " ;";
 	sqlite3_stmt *pRes;
