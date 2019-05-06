@@ -46,7 +46,7 @@ void settingsMenu(sqlite3 *db);
 string locidSubMenu(sqlite3 * db);
 string tournidSubMenu(sqlite3 * db, string loc_id);
 string angleridSubMenu(sqlite3 * db);
-string anglersByTournament(sqlite3 *db, string tourn_id)
+string anglersByTournament(sqlite3 *db, string tourn_id);
 
 int main()
 {
