@@ -12,6 +12,8 @@
 #include <sstream>
 #include "sqlite3.h"
 #include "prompt.h"
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 
@@ -44,7 +46,7 @@ void settingsMenu(sqlite3 *db);
 string locidSubMenu(sqlite3 * db);
 string tournidSubMenu(sqlite3 * db, string loc_id);
 string angleridSubMenu(sqlite3 * db);
-string anglersByTournament(sqlite3 *db)
+string anglersByTournament(sqlite3 *db, string tourn_id)
 
 int main()
 {
@@ -154,7 +156,43 @@ void registrationMenu(sqlite3 *db){
 }
 
 void weighinMenu(sqlite3 *db){
-	angler_id = anglersByTournament(db);
+	string loc_id = locidSubMenu(db);
+	string tourn_id = tournidSubMenu(db, loc_id);
+	string angler_id = anglersByTournament(db, tourn_id);
+	cin.clear();
+	cin.ignore();
+	string weigh_weight = promptForString("Weight in Pounds (12.36): ");
+	string weigh_numfish = promptForString("Total Fish: ");
+	string weigh_shortfish = promptForString("Short Fish: ");
+	string weigh_deadfish = promptForString("Dead Fish: ");
+	string weigh_minlate = promptForString("Minutes Late: ");
+	auto timenow =
+		 chrono::system_clock::to_time_t(chrono::system_clock::now());
+
+	 cout << ctime(&timenow) << endl;
+	string weigh_timestamp = ctime(&timenow);
+	// Generate string for query  Use Ternary operators to put in NULL if empty string.
+	string query = "INSERT INTO weighin (angler_id, tourn_id, weigh_timestamp, weigh_weight, weigh_numfish, weigh_shortfish, weigh_deadfish, weigh_minlate)	VALUES ("+ ((angler_id != "") ? ("'" + angler_id + "'") : "NULL") + ","+ ((tourn_id != "") ? ("'" + tourn_id + "'") : "NULL") + ","+ ((weigh_timestamp != "") ? ("'" + weigh_timestamp + "'") : "NULL") + ","+ ((weigh_weight != "") ? ("'" + weigh_weight + "'") : "NULL") + ","+ ((weigh_numfish != "") ? ("'" + weigh_numfish + "'") : "NULL") + ","+ ((weigh_shortfish != "") ? ("'" + weigh_shortfish + "'") : "NULL") + ","+ ((weigh_deadfish != "") ? ("'" + weigh_deadfish + "'") : "NULL") + ","+ ((weigh_minlate != "") ? ("'" + weigh_minlate + "'") : "NULL") + ");";
+	sqlite3_stmt* pRes;
+	string m_strLastError;
+
+
+	if (sqlite3_prepare_v2(db, query.c_str(), -1, &pRes, NULL) != SQLITE_OK)
+	{
+		m_strLastError = sqlite3_errmsg(db);
+		sqlite3_finalize(pRes);
+		cout << "There was an error: " << m_strLastError << endl;
+		return;
+	}
+	else
+	{
+		int columnCount = sqlite3_column_count(pRes);
+		columnCount = sqlite3_column_count(pRes);
+		cout << left;
+		cout << "| Record Added" << endl;
+
+		sqlite3_finalize(pRes);
+	}
 
 
 }
@@ -396,22 +434,8 @@ void addAngler(sqlite3 *db){
 		int columnCount = sqlite3_column_count(pRes);
 		columnCount = sqlite3_column_count(pRes);
 		cout << left;
-		for (int i = 0; i < columnCount; i++)
-		{
-			cout << "|" << setw(20) << sqlite3_column_name(pRes, i);
-		}
-		cout << "|" << endl;
-		while (sqlite3_step(pRes) == SQLITE_ROW)
-		{
-			for (int i = 0; i < columnCount; i++)
-			{
-				if (sqlite3_column_type(pRes, i) != SQLITE_NULL)
-					cout << "|" << setw(20) << sqlite3_column_text(pRes, i);
-				else
-					cout << "|" << setw(20) << " ";
-			}
-			cout << "| Record Added" << endl;
-		}
+		cout << "| Record Added" << endl;
+
 		sqlite3_finalize(pRes);
 	}
 
@@ -771,11 +795,7 @@ string angleridSubMenu(sqlite3 * db) {
 	}
 	return angler_id;
 }
-
-string anglersByTournament(sqlite3 *db){
-	string loc_id = locidSubMenu(db);
-	string tourn_id = tournidSubMenu(db, loc_id);
-
+string anglersByTournament(sqlite3 *db, string tourn_id){
 	string query = "SELECT angler_fname || ' ' || angler_lname AS Name, angler_id FROM angler INNER JOIN registration ON angler.angler_id = registration.angler_id WHERE registration.tourn_id = " + tourn_id + " ;";
 	sqlite3_stmt *pRes;
 	string m_strLastError;
